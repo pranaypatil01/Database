@@ -1,0 +1,116 @@
+search tomcat 8
+Tomcat package name
+ curl -O https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.97/bin/apache-tomcat-8.5.97.tar.gz
+
+in aws 
+wget https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.97/bin/apache-tomcat-8.5.97.tar.gz
+
+now go inside apache-tomcat-8.5.97
+
+you have webaapps ==> cp student.war or .war file in webapps
+here you have bin ==> in bin we have catalina.sh
+change permission of catalina.sh to chmod 777 catalina.sh
+and start catalina.sh file
+bash catalina.sh run
+./ catalina.sh run
+
+go to firefox localhost:8080/student
+if it doesnt appear on webpage
+reboot your system
+another point is to add 8080 port in firewalld 
+firewallcmd --add-port=8080/tcp
+
+if still nothing shows up after hittng localhost or ip:8080/student
+reboot system and then hit the ip it will showup.
+
+now to attach MariaDb
+for aws the name of mariadb is  yum install mysql57-server for MariaDB 5.7 mariadb.105-server
+apt install mariadb-client-10.5 mariadb-server-10.5  
+for aws linux2 mariadb-server 
+ 
+yum install mariadb-server
+systemctl start mariadb
+systemctl status mariadb
+systemctl enable mariadb
+add firewall port 3306
+firewall-cmd --add-port=3306/tcp
+mysql_secure_installation
+enter root pw-enter(if first time) else put p/w if your logging twice
+configure new password - put new password (1234)
+confirm new password -1234
+remove anonymous user -y
+disallow root login -y (if you want remote connection i.e 1 server has sql other has apcahe press N)
+remote test & access - y ((if you want remote connection i.e 1 server has sql other has apcahe press N))
+reload privilage -y
+
+
+mysql -h localhost -u root -p1234
+
+now once you go into mariadb
+show databases;
+create database studentapp;
+
+either copy sql database query from tomcat.txt file
+use studentapp;
+CREATE TABLE if not exists students(student_id INT NOT NULL AUTO_INCREMENT,
+	student_name VARCHAR(100) NOT NULL,
+        student_addr VAlsRCHAR(100) NOT NULL,
+	student_age VARCHAR(3) NOT NULL,
+	student_qual VARCHAR(20) NOT NULL,
+	student_percent VARCHAR(10) NOT NULL,
+	student_year_passed VARCHAR(10) NOT NULL,
+	PRIMARY KEY (student_id)
+);
+
+later go to apache file and here go to lib 
+in lib and copy mysql-connector.jar file into it
+
+next part is open apache.txt file in other tab and copy 
+
+	       <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource"
+               maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+               username="USERNAME" password="PASSWORD" driverClassName="com.mysql.jdbc.Driver"
+               url="jdbc:mysql://DB-ENDPOINT:3306/DATABASE"/>
+
+copy the above text into apache > conf > context.xml
+
+go to line number 21 > vim context.xml(line no 21)
+and paste the line
+
+now few changes to make are
+username=root , password=1234 ,
+url="jdbc:mysql://localhost:3306/studentapp"
+ 
+for example:-
+<Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource"
+maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+username="root" password="1234" driverClassName="com.mysql.jdbc.Driver"
+url="jdbc:mysql://localhost:3306/studentapp"/>
+
+now how to view entries in databases
+SHOW DATABASES; -- gives you list of available databases
+SHOW TABLES; -- list tables in a specific database
+DESCRIBE TABLE_NAME -- Views you schema
+SELECT * FROM table_name; -- view data in table
+SELECT * FROM table_name WHERE id > 10;
+SELECT * FROM table_name LIMIT 10; limiting.
+
+to do entries in new table
+CREATE DATABASE DEMO;
+USE DEMO;
+CREATE TABLE HELLO(name varchar(70),roll_no int(3),status varchar(10));
+insert into HELLO values("anup",1,"pass");
+insert into HELLO values("anup",1,"pass"),("gayatri",2,"pass");
+
+
+student app hosting
+#!/bin/bash
+sudo -i
+systemctl start mariadb
+systemctl enable mariadb
+bash /root/apache-tomcat-8.5.97/bin/catalina.sh start
+
+
+
+
+
